@@ -1,54 +1,23 @@
 version: "{build}"
 image: Visual Studio 2022
 
-clone_depth: 1
+clone_script:
+  - cmd: git clone --recurse-submodules -j4 https://github.com/%APPVEYOR_REPO_NAME%.git %APPVEYOR_BUILD_FOLDER%
+  - cmd: git -C %APPVEYOR_BUILD_FOLDER% checkout %APPVEYOR_REPO_BRANCH%
 
 environment:
   MSYSTEM: CLANG64
-  CHERE_INVOKING: enabled_from_MSYS2
-
-init:
-  - git submodule update --init --recursive
 
 install:
-  - cmd: C:\msys64\usr\bin\bash -lc "pacman -Syu --noconfirm --needed 2>&1 | tail -5"
-  - cmd: >-
-      C:\msys64\usr\bin\bash -lc "pacman -S --noconfirm --needed
-      mingw-w64-clang-x86_64-toolchain
-      mingw-w64-clang-x86_64-cmake
-      mingw-w64-clang-x86_64-ninja
-      mingw-w64-clang-x86_64-extra-cmake-modules
-      mingw-w64-clang-x86_64-qt6-base
-      mingw-w64-clang-x86_64-qt6-svg
-      mingw-w64-clang-x86_64-qt6-imageformats
-      mingw-w64-clang-x86_64-qt6-networkauth
-      mingw-w64-clang-x86_64-cmark
-      mingw-w64-clang-x86_64-qrencode
-      mingw-w64-clang-x86_64-tomlplusplus
-      mingw-w64-clang-x86_64-libarchive
-      2>&1 | tail -10"
+  - cmd: C:\msys64\usr\bin\bash -lc "pacman -Syu --noconfirm --needed 2>&1 | tail -3"
+  - cmd: C:\msys64\usr\bin\bash -lc "pacman -S --noconfirm --needed mingw-w64-clang-x86_64-toolchain mingw-w64-clang-x86_64-cmake mingw-w64-clang-x86_64-ninja mingw-w64-clang-x86_64-extra-cmake-modules mingw-w64-clang-x86_64-qt6-base mingw-w64-clang-x86_64-qt6-svg mingw-w64-clang-x86_64-qt6-imageformats mingw-w64-clang-x86_64-qt6-networkauth mingw-w64-clang-x86_64-cmark mingw-w64-clang-x86_64-qrencode mingw-w64-clang-x86_64-tomlplusplus mingw-w64-clang-x86_64-libarchive 2>&1 | tail -5"
 
 build_script:
-  - cmd: >-
-      C:\msys64\usr\bin\bash -lc "
-      export PATH=/clang64/bin:$PATH &&
-      cd '%APPVEYOR_BUILD_FOLDER%' &&
-      cmake --preset windows_mingw -DCMAKE_BUILD_TYPE=Release &&
-      cmake --build --preset windows_mingw --config Release --parallel
-      "
+  - cmd: C:\msys64\usr\bin\bash -lc "export PATH=/clang64/bin:/usr/bin:$PATH && cd $(cygpath '%APPVEYOR_BUILD_FOLDER%') && cmake --preset windows_mingw -DCMAKE_BUILD_TYPE=Release && cmake --build --preset windows_mingw --config Release --parallel $(nproc)"
 
 after_build:
-  - cmd: >-
-      C:\msys64\usr\bin\bash -lc "
-      export PATH=/clang64/bin:$PATH &&
-      cd '%APPVEYOR_BUILD_FOLDER%/build' &&
-      mkdir -p dist &&
-      cp *.exe dist/ 2>/dev/null || true &&
-      cd dist &&
-      for dll in $(ldd ../YakubiLauncher.exe 2>/dev/null | grep clang64 | awk '{print $3}'); do cp $dll . 2>/dev/null || true; done
-      " 2>&1 || true
+  - cmd: C:\msys64\usr\bin\bash -lc "export PATH=/clang64/bin:/usr/bin:$PATH && cd $(cygpath '%APPVEYOR_BUILD_FOLDER%') && mkdir -p dist && cp build/yakulauncher.exe dist/ && windeployqt6 --release --no-translations dist/yakulauncher.exe && zip -r YakubiLauncher-Windows.zip dist/"
 
 artifacts:
-  - path: build\dist\*
+  - path: YakubiLauncher-Windows.zip
     name: YakubiLauncher-Windows
-    type: zip
