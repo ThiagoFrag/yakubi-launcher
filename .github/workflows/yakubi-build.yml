@@ -9,7 +9,7 @@ on:
 jobs:
   test:
     name: Test runner
-    runs-on: windows-2022
+    runs-on: ubuntu-latest
     steps:
       - name: Hello
-        run: echo "Runner works"
+        run: echo "Runner works!"
