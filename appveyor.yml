@@ -1,0 +1,54 @@
+version: "{build}"
+image: Visual Studio 2022
+
+clone_depth: 1
+
+environment:
+  MSYSTEM: CLANG64
+  CHERE_INVOKING: enabled_from_MSYS2
+
+init:
+  - git submodule update --init --recursive
+
+install:
+  - cmd: C:\msys64\usr\bin\bash -lc "pacman -Syu --noconfirm --needed 2>&1 | tail -5"
+  - cmd: >-
+      C:\msys64\usr\bin\bash -lc "pacman -S --noconfirm --needed
+      mingw-w64-clang-x86_64-toolchain
+      mingw-w64-clang-x86_64-cmake
+      mingw-w64-clang-x86_64-ninja
+      mingw-w64-clang-x86_64-extra-cmake-modules
+      mingw-w64-clang-x86_64-qt6-base
+      mingw-w64-clang-x86_64-qt6-svg
+      mingw-w64-clang-x86_64-qt6-imageformats
+      mingw-w64-clang-x86_64-qt6-networkauth
+      mingw-w64-clang-x86_64-cmark
+      mingw-w64-clang-x86_64-qrencode
+      mingw-w64-clang-x86_64-tomlplusplus
+      mingw-w64-clang-x86_64-libarchive
+      2>&1 | tail -10"
+
+build_script:
+  - cmd: >-
+      C:\msys64\usr\bin\bash -lc "
+      export PATH=/clang64/bin:$PATH &&
+      cd '%APPVEYOR_BUILD_FOLDER%' &&
+      cmake --preset windows_mingw -DCMAKE_BUILD_TYPE=Release &&
+      cmake --build --preset windows_mingw --config Release --parallel
+      "
+
+after_build:
+  - cmd: >-
+      C:\msys64\usr\bin\bash -lc "
+      export PATH=/clang64/bin:$PATH &&
+      cd '%APPVEYOR_BUILD_FOLDER%/build' &&
+      mkdir -p dist &&
+      cp *.exe dist/ 2>/dev/null || true &&
+      cd dist &&
+      for dll in $(ldd ../YakubiLauncher.exe 2>/dev/null | grep clang64 | awk '{print $3}'); do cp $dll . 2>/dev/null || true; done
+      " 2>&1 || true
+
+artifacts:
+  - path: build\dist\*
+    name: YakubiLauncher-Windows
+    type: zip
