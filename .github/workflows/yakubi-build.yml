@@ -1,0 +1,56 @@
+name: Yakubi Build
+
+on:
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows:
+    name: Build Windows (MSVC)
+    runs-on: windows-2022
+
+    env:
+      BUILD_TYPE: Release
+      CMAKE_PRESET: windows_msvc
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup dependencies
+        uses: ./.github/actions/setup-dependencies
+        with:
+          build-type: Release
+          artifact-name: Windows-MSVC
+          vcvars-arch: amd64
+          qt-version: "6.10.2"
+
+      - name: Configure
+        shell: bash
+        run: cmake --preset "$CMAKE_PRESET"
+
+      - name: Build
+        shell: bash
+        run: cmake --build --preset "$CMAKE_PRESET" --config Release
+
+      - name: Collect artifacts
+        shell: bash
+        run: |
+          mkdir -p yakubi-dist
+          find build -name "*.exe" | head -20
+          cp build/Release/*.exe yakubi-dist/ 2>/dev/null || cp build/*.exe yakubi-dist/ 2>/dev/null || true
+          cp build/Release/*.dll yakubi-dist/ 2>/dev/null || true
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: YakubiLauncher-Windows
+          path: yakubi-dist/
+          if-no-files-found: warn
