@@ -1087,6 +1087,8 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/ImportResourceDialog.h
     ui/dialogs/AuthlibInjectorLoginDialog.cpp
     ui/dialogs/AuthlibInjectorLoginDialog.h
+    ui/dialogs/DiscordLinkDialog.cpp
+    ui/dialogs/DiscordLinkDialog.h
     ui/dialogs/MSALoginDialog.cpp
     ui/dialogs/MSALoginDialog.h
     ui/dialogs/NetworkJobFailedDialog.cpp
@@ -1285,6 +1287,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/dialogs/ImportResourceDialog.ui
     ui/dialogs/MSALoginDialog.ui
     ui/dialogs/AuthlibInjectorLoginDialog.ui
+    ui/dialogs/DiscordLinkDialog.ui
     ui/dialogs/AboutDialog.ui
     ui/dialogs/ReviewMessageBox.ui
     ui/dialogs/ScrollMessageBox.ui

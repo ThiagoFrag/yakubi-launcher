@@ -17,7 +17,6 @@
  */
 
 #include "AuthlibInjectorLoginDialog.h"
-#include "ui/dialogs/CustomMessageBox.h"
 #include "ui_AuthlibInjectorLoginDialog.h"
 
 #include "Application.h"
@@ -33,6 +32,10 @@ AuthlibInjectorLoginDialog::AuthlibInjectorLoginDialog(QWidget* parent) : QDialo
     ui->errorMessage->setVisible(false);
     ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
     setAcceptDrops(true);
+
+    // Pre-fill and lock the server URL to mc.lin.lgbt
+    ui->authlibInjectorTextBox->setText("https://mc.lin.lgbt/authlib-injector");
+    ui->authlibInjectorTextBox->setReadOnly(true);
 
     connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
@@ -94,18 +97,6 @@ void AuthlibInjectorLoginDialog::accept()
     ui->errorMessage->setVisible(false);
     auto fixedAuthlibInjectorUrl = AuthlibInjectorLoginDialog::fixUrl(ui->authlibInjectorTextBox->text());
 
-    auto response = CustomMessageBox::selectable(this, QObject::tr("Confirm account creation"),
-                                                 QObject::tr("Warning: you are about to send the username and password you entered to an "
-                                                             "unofficial, third-party authentication server:\n"
-                                                             "%1\n\n"
-                                                             "Never use your Mojang or Microsoft password for a third-party account!\n\n"
-                                                             "Are you sure you want to proceed?")
-                                                     .arg(fixedAuthlibInjectorUrl),
-                                                 QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
-                        ->exec();
-    if (response != QMessageBox::Yes)
-        return;
-
     setUserInputsEnabled(false);
     ui->loadingLabel->setVisible(true);
 
@@ -132,21 +123,18 @@ void AuthlibInjectorLoginDialog::setUserInputsEnabled(bool enable)
     ui->buttonBox->setEnabled(enable);
 }
 
-// Enable the OK button only when all textboxes contain something.
+// Enable the OK button when username and password are filled (server URL is pre-configured).
 void AuthlibInjectorLoginDialog::on_userTextBox_textEdited(const QString& newText)
 {
-    ui->buttonBox->button(QDialogButtonBox::Ok)
-        ->setEnabled(!newText.isEmpty() && !ui->passTextBox->text().isEmpty() && !ui->authlibInjectorTextBox->text().isEmpty());
+    ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(!newText.isEmpty() && !ui->passTextBox->text().isEmpty());
 }
 void AuthlibInjectorLoginDialog::on_passTextBox_textEdited(const QString& newText)
 {
-    ui->buttonBox->button(QDialogButtonBox::Ok)
-        ->setEnabled(!newText.isEmpty() && !ui->passTextBox->text().isEmpty() && !ui->authlibInjectorTextBox->text().isEmpty());
+    ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(!newText.isEmpty() && !ui->userTextBox->text().isEmpty());
 }
-void AuthlibInjectorLoginDialog::on_authlibInjectorTextBox_textEdited(const QString& newText)
+void AuthlibInjectorLoginDialog::on_authlibInjectorTextBox_textEdited([[maybe_unused]] const QString& newText)
 {
-    ui->buttonBox->button(QDialogButtonBox::Ok)
-        ->setEnabled(!newText.isEmpty() && !ui->passTextBox->text().isEmpty() && !ui->authlibInjectorTextBox->text().isEmpty());
+    // URL is read-only and pre-configured; no action needed.
 }
 
 void AuthlibInjectorLoginDialog::onApiLocationTaskFailed(const QString& reason)

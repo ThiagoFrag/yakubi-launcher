@@ -77,6 +77,7 @@
 #include "ui/setupwizard/ThemeWizardPage.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
+#include "ui/dialogs/DiscordLinkDialog.h"
 
 #include "ui/pagedialog/PageDialog.h"
 
@@ -1416,6 +1417,8 @@ void Application::performMainStartupAction()
         // normal main window
         showMainWindow(false);
         qDebug() << "<> Main window shown.";
+        // Prompt Discord linking once if not yet dismissed
+        DiscordLinkDialog::showIfNeeded(m_mainWindow);
     }
 
     // initialize the updater

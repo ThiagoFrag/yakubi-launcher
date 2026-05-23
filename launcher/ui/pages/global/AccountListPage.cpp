@@ -55,8 +55,9 @@ AccountListPage::AccountListPage(QWidget* parent) : QMainWindow(parent), ui(new 
 {
     ui->setupUi(this);
     ui->listView->setEmptyString(
-        tr("Welcome!\n"
-           "If you're new here, you can select the \"Add Offline\" button to play without an account."));
+        tr("Bem-vindo ao Yakubi Launcher!\n"
+           "Clique em \"Adicionar Conta\" para entrar com sua conta do servidor mc.lin.lgbt.\n"
+           "Não tem conta? Acesse: mc.lin.lgbt/web/registration"));
     ui->listView->setEmptyMode(VersionListView::String);
     ui->listView->setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -86,11 +87,8 @@ AccountListPage::AccountListPage(QWidget* parent) : QMainWindow(parent), ui(new 
 
     updateButtonStates();
 
-    // Xbox authentication won't work without a client identifier, so disable the button if it is missing
-    if (~APPLICATION->capabilities() & Application::SupportsMSA) {
-        ui->actionAddMicrosoft->setVisible(false);
-        ui->actionAddMicrosoft->setToolTip(tr("No Microsoft Authentication client ID was set."));
-    }
+    // Yakubi Launcher uses its own auth server; Microsoft login is not supported.
+    ui->actionAddMicrosoft->setVisible(false);
 }
 
 AccountListPage::~AccountListPage()
@@ -133,12 +131,9 @@ void AccountListPage::listChanged()
 void AccountListPage::on_actionAddAuthlibInjector_triggered()
 {
     MinecraftAccountPtr account = AuthlibInjectorLoginDialog::newAccount(
-        this, tr("Please enter your username (sometimes an email address), password, and the URL of your API server."
+        this, tr("Entre com sua conta do <b>Yakubi</b>."
                  "<br>"
-                 "See <a href=\"https://github.com/unmojang/FjordLauncher/blob/develop/doc/alternative-auth-servers.md\">this page</a> in "
-                 "the Fjord Launcher repository for a list of common API servers."
-                 "<br><br>"
-                 "<b>Caution!</b> Your username and password will be sent to the authentication server you specify!"));
+                 "Não tem conta? <a href=\"https://mc.lin.lgbt/web/registration?invite=YBB5rvU3BtO\">Criar conta aqui</a>"));
 
     if (account) {
         m_accounts->addAccount(account);
