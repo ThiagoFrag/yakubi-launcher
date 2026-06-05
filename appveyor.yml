@@ -21,3 +21,29 @@ after_build:
 artifacts:
   - path: YakubiLauncher-Windows.zip
     name: YakubiLauncher-Windows
+
+# Publishes the Windows build as a GitHub Release when a git tag is pushed.
+# Normal pushes to develop still build, but only tag pushes deploy.
+# Before the first tagged release: create a GitHub PAT (scope: public_repo),
+# encrypt it at https://ci.appveyor.com/tools/encrypt and paste below.
+deploy:
+  - provider: GitHub
+    tag: $(APPVEYOR_REPO_TAG_NAME)
+    release: Yakubi Launcher $(APPVEYOR_REPO_TAG_NAME)
+    description: |
+      ## Yakubi Launcher — Build do Windows
+
+      **YakubiLauncher-Windows.zip** — versão portátil pro Windows (Qt6, 64-bit).
+
+      ### Como usar
+      1. Baixe e extraia o `.zip`
+      2. Rode `yakulauncher.exe` (não precisa instalar)
+      3. Crie sua conta em https://mc.lin.lgbt/web/registration e faça login no launcher
+    auth_token:
+      secure: REPLACE_WITH_APPVEYOR_ENCRYPTED_GITHUB_TOKEN
+    artifact: YakubiLauncher-Windows
+    draft: false
+    prerelease: false
+    force_update: true
+    on:
+      APPVEYOR_REPO_TAG: true
