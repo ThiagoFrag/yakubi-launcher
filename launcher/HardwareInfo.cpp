@@ -25,8 +25,10 @@
 #include "BuildConfig.h"
 
 #ifndef Q_OS_MACOS
+#include <QVersionNumber>
 #include <QVulkanInstance>
 #include <QVulkanWindow>
+#include <vulkan/vulkan_core.h>
 #endif
 
 namespace {
